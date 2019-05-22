@@ -6,9 +6,8 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-nameko = "*"
-nameko-redis-py = "*"
 sqlalchemy = "*"
+redis = "*"
 
 [requires]
 python_version = "3.7"

@@ -27,10 +27,27 @@ def populate_default():
     session.close()
 
 
-def insert_poi_entity(data):
-    poi_log_entry = PoiLog(id=0, activity_type_id=1, user_id=data['user_id'], username='user1', user_agent='Mozilla')
+def insert_poi_entity(data, activity_id):
+    poi_log_entry = PoiLog(id=0, activity_type_id=activity_id, user_id=data['user_id'], username='user1', user_agent='Mozilla')
     session = Session()
     session.add(poi_log_entry)
     session.commit()
     session.query(PoiLog).all()
     session.close()
+
+
+def insert_error_log(data, activity_id):
+    poi_log_entry = PoiLog(id=0, activity_type_id=activity_id, user_id=data['user_id'], username='user1', user_agent='Mozilla')
+    session = Session()
+    session.add(poi_log_entry)
+    session.commit()
+    session.query(PoiLog).all()
+    session.close()
+
+
+def get_activity_by(search='ACTIVITY'):
+    session = Session()
+    return session \
+        .query(ActivityType) \
+        .filter(ActivityType.type == search) \
+        .all()

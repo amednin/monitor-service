@@ -23,11 +23,12 @@ class PoiLog(Base):
     user_id = Column(db.Integer)
     username = Column(db.String(45))
     user_agent = Column(db.String(100))
+    ip = Column(db.String(45))
 
-    ActivityType = relationship('ActivityType', backref='PoiLog')
-    AuditLog = relationship('AuditLog', uselist=False, back_populates='PoiLog')
-    ErrorLog = relationship('ErrorLog', uselist=False, back_populates='PoiLog')
-    MetricsLog = relationship('MetricsLog', uselist=False, back_populates='PoiLog')
+    ActivityType = relationship('ActivityType', backref='PoiLog', cascade='all, delete-orphan', single_parent=True)
+    AuditLog = relationship('AuditLog', uselist=False, back_populates='PoiLog', cascade='all, delete-orphan', single_parent=True)
+    ErrorLog = relationship('ErrorLog', uselist=False, back_populates='PoiLog', cascade='all, delete-orphan', single_parent=True)
+    MetricsLog = relationship('MetricsLog', uselist=False, back_populates='PoiLog', cascade='all, delete-orphan', single_parent=True)
 
     def __repr__(self):
         return "<{0} Id: {1} - UserId: {2}".format(self.__class__.__name__, self.id, self.user_id)

@@ -7,5 +7,5 @@ engine = create_engine('mysql+mysqlconnector://root:123@localhost:3306/monitor_s
 
 Base = declarative_base()
 
-Session = sessionmaker()
+Session = sessionmaker(expire_on_commit=False)
 Session.configure(bind=engine)

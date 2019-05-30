@@ -1,5 +1,5 @@
 from models.base import Base, engine
-from models.entities import ActivityType, PoiLog, AuditLog, ErrorLog
+from models.entities import ActivityType, PoiLog, AuditLog, ErrorLog, MetricsLog, Log
 from models.constants import ActivityType as ActivityTypeEnum
 import sys
 import json
@@ -33,7 +33,7 @@ def insert_audit_log(db_session, data):
         log_type = get_activity_by_type(db_session, ActivityTypeEnum.ACTIVITY.value)
         poi_log_entity = create_poi_log_entity(data, log_type)
 
-        entity_name = data['key'].split('.')[2]
+        entity_name = data['key'].split('.')[2] # TODO: Capitalize
         current_value = json.dumps(data['request']['payload'])
         action = data['request']['request']
         audit_log_entity = AuditLog(current_value=current_value, entity_name=entity_name, action=action)
@@ -48,11 +48,16 @@ def insert_audit_log(db_session, data):
 
         poi_log_entity.AuditLog = audit_log_entity
 
+        # Register benchmarking info
+        if data['benchmark']:
+            metrics_entity = insert_metrics(poi_log_entity, data)
+            poi_log_entity.MetricsLog = metrics_entity
+
         db_session.add(poi_log_entity)
         db_session.commit()
     except Exception:
         db_session.rollback()
-        print('Error while creating Database!', sys.exc_info()[0])
+        print('Error while inserting AuditLog!', sys.exc_info()[0])
         raise
     finally:
         db_session.close()
@@ -74,10 +79,37 @@ def insert_error_log(db_session, data):
 
     except Exception:
         db_session.rollback()
-        print('Error while creating Database!', sys.exc_info()[0])
+        print('Error while inserting ErrorLog!', sys.exc_info()[0])
         raise
     finally:
         return poi_to_return
+
+
+def insert_metrics(poi_log_entity, data):
+    metrics_entity = MetricsLog()
+    benchmark_data = data['benchmark']
+    metrics_entity.requested_at = benchmark_data['requested_at']
+    metrics_entity.response_at = benchmark_data['response_at']
+    metrics_entity.response_time_ms = benchmark_data['response_time_ms']
+
+    poi_log_entity.MetricsLog = metrics_entity
+
+    return metrics_entity
+
+
+def insert_log(db_session, data):
+    try:
+        log_entity = Log(service=data['service'], type=data['type'], log=data['message'])
+
+        db_session.add(log_entity)
+        db_session.commit()
+
+    except Exception:
+        db_session.rollback()
+        print('Error while creating Database!', sys.exc_info()[0])
+        raise
+    finally:
+        db_session.close()
 
 
 def get_activity_by_type(db_session, a_type):
@@ -105,3 +137,9 @@ def create_poi_log_entity(data, activity_type_entity):
     poi_log_entity.ActivityType = activity_type_entity
 
     return poi_log_entity
+
+def get_expections(tail_datime): # TODO: en SQL
+    pass
+
+def get_requests_more_than_ms(milliseconds):  # TODO: en SQL
+    pass

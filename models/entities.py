@@ -70,7 +70,6 @@ class MetricsLog(Base):
     __tablename__ = 'MetricsLog'
 
     poi_log_id = Column(db.Integer, db.schema.ForeignKey('PoiLog.id'), nullable=False, primary_key=True)
-    created_at = Column(db.DateTime)
     cpu_usage = Column(db.DECIMAL)
     response_time_ms = Column(db.DECIMAL)
     requested_at = Column(db.DateTime)
@@ -81,3 +80,17 @@ class MetricsLog(Base):
 
     def __repr__(self):
         return "<{0} PoiLogId: {1} - Resource: {2}".format(self.__class__.__name__, self.poi_log_id, self.resource)
+
+
+class Log(Base):
+    __tablename__ = 'Log'
+
+    id = Column(db.Integer, primary_key=True, unique=True, autoincrement=True)
+    logged_at = Column(db.DateTime, default=db.func.now())
+    log = Column(db.String(1000))
+    type = Column(db.String(45))
+    service = Column(db.String(45))
+
+    def __repr__(self):
+        return "<{0} Service: {1} - Type: {2} - Date: {3}"\
+            .format(self.__class__.__name__, self.service, self.type, self.logged_at)

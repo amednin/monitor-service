@@ -3,6 +3,7 @@ from models.entities import ActivityType, PoiLog, AuditLog, ErrorLog, MetricsLog
 from models.constants import ActivityType as ActivityTypeEnum
 import sys
 import json
+from datetime import datetime
 
 
 def create_db_schema():
@@ -33,10 +34,10 @@ def insert_audit_log(db_session, data):
         log_type = get_activity_by_type(db_session, ActivityTypeEnum.ACTIVITY.value)
         poi_log_entity = create_poi_log_entity(data, log_type)
 
-        entity_name = data['key'].split('.')[2] # TODO: Capitalize
+        entity_name = data['key'].split('.')[2]
         current_value = json.dumps(data['request']['payload'])
         action = data['request']['request']
-        audit_log_entity = AuditLog(current_value=current_value, entity_name=entity_name, action=action)
+        audit_log_entity = AuditLog(current_value=current_value, entity_name=entity_name.capitalize(), action=action)
 
         if data['request'].get('old_value', False):
             old_value = data['request']['old_value'] # Confirm this is going to be the place for old_value
@@ -88,8 +89,8 @@ def insert_error_log(db_session, data):
 def insert_metrics(poi_log_entity, data):
     metrics_entity = MetricsLog()
     benchmark_data = data['benchmark']
-    metrics_entity.requested_at = benchmark_data['requested_at']
-    metrics_entity.response_at = benchmark_data['response_at']
+    metrics_entity.requested_at = datetime.fromtimestamp(int(benchmark_data['requested_at']))
+    metrics_entity.response_at = datetime.fromtimestamp(int(benchmark_data['response_at']))
     metrics_entity.response_time_ms = benchmark_data['response_time_ms']
 
     poi_log_entity.MetricsLog = metrics_entity

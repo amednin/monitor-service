@@ -1,8 +1,7 @@
-import redis
+from RedisConnector import RedisConnector
 
 
-def create_redis_connector(connector, redis_config):
-    connector_config = redis_config['connectors'][connector]
-    r = redis.StrictRedis(**connector_config)
+def create_redis_connector(redis_config):
+    r_connector = RedisConnector(redis_config)
 
-    return r
+    return r_connector

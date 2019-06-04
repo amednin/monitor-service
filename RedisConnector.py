@@ -4,6 +4,7 @@ import time
 from models.queries import insert_audit_log, insert_error_log, insert_log
 from models.constants import LogType, ErrorSeverity
 from alert_handler.AlertDispatcher import AlertDispatcher
+from ThresholdHandler import ThresholdHandler
 
 
 class RedisConnector:
@@ -14,6 +15,7 @@ class RedisConnector:
         self.p = self.r.pubsub()
         self.channels_to_listen = channels_to_listen
         self.alert_dispatcher = AlertDispatcher(self)
+        self.threshold_analyzer = ThresholdHandler()
 
     def set_db_manager(self, session):
         self.db_session = session
@@ -52,6 +54,7 @@ class RedisConnector:
     def listen_to_logs_channel(self, redis_message, message_data):
         if redis_message.get('channel', '') == 'logs-channel':
             insert_log(self.db_session, message_data)
+            self.alert_dispatcher.send_log_alert(message_data)
 
     def listen_to_activity(self, message_data):
         log_type = message_data['type']
@@ -61,6 +64,7 @@ class RedisConnector:
                 self.alert_dispatcher.send_no_auth_alert()
             else:
                 insert_audit_log(self.db_session, message_data['message'])
+                self.do_threshold_analysis(message_data['message'])
 
     def listen_to_error(self, message_data):
         log_type = message_data['type']
@@ -68,8 +72,12 @@ class RedisConnector:
         if log_type == LogType.ERROR.value:
             poi_log = insert_error_log(self.db_session, message_data['message'])
 
-            if poi_log.ErrorLog.severity == ErrorSeverity.EXCEPTION.value:
+            if poi_log.ErrorLog.severity == ErrorSeverity.LOW.value:
                 self.alert_dispatcher.send_error_alert(poi_log)
+
+    def do_threshold_analysis(self, message):
+        self.threshold_analyzer.do_benchmark_analysis(message['benchmark'], self.alert_dispatcher)
+        # self.threshold_analyzer.do_logins_analysis()
 
     @staticmethod
     def is_valid_user_session(data):

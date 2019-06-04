@@ -27,5 +27,19 @@ class AlertDispatcher:
         }
         self.send_alert('error-alert', json.dumps(not_auth_message))
 
+    def send_log_alert(self, message_data):
+        message = {
+            "type": ' ERROR-ALERT',
+            "message": message_data['message']
+        }
+        self.send_alert('error-alert', json.dumps(message))
+
+    def send_benchmark_alert(self, threshold, value):
+        message = {
+            "type": ' ERROR-ALERT',
+            "message": '[BENCHMARK]: ' + threshold + ' threshold has violate the minimum allowed value with ' + str(value)
+        }
+        self.send_alert('error-alert', json.dumps(message))
+
     def send_alert(self, channel, message):
         self.message_broker.r.publish(channel, message)

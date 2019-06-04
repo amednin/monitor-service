@@ -13,6 +13,6 @@ class LogType(Enum):
 
 
 class ErrorSeverity(Enum):
-    EXCEPTION = 'exception'
-    INFO = 'info'
-    WARNING = 'warning'
+    LOW = 'low'
+    MEDIUM = 'medium'
+    HIGH = 'high'

@@ -14,24 +14,35 @@ class ActivityType(Base):
         return "<{0} Id: {1} - Type: {2}".format(self.__class__.__name__, self.id, self.type)
 
 
+class Client(Base):
+    __tablename__ = 'Client'
+
+    id = Column(db.INTEGER, primary_key=True, autoincrement=True)
+    username = Column(db.String(45))
+    user_agent = Column(db.String(100))
+
+    def __repr__(self):
+        return "<{0} Username: {1} - UserAgent: {2}".format(self.__class__.__name__, self.username, self.user_agent)
+
+
 class PoiLog(Base):
     __tablename__ = 'PoiLog'
 
     id = Column(db.Integer, primary_key=True, unique=True, autoincrement=True)
     activity_type_id = Column(db.Integer, db.schema.ForeignKey('ActivityType.id'), nullable=False)
+    client_id = Column(db.Integer, db.schema.ForeignKey('Client.id'), nullable=False)
     created_at = Column(db.DateTime, default=db.func.now())
     user_id = Column(db.Integer)
-    username = Column(db.String(45))
-    user_agent = Column(db.String(100))
     ip = Column(db.String(45))
 
     ActivityType = relationship('ActivityType', backref='PoiLog', cascade='all, delete-orphan', single_parent=True)
+    Client = relationship('Client', backref='PoiLog', cascade='all, delete-orphan', single_parent=True)
     AuditLog = relationship('AuditLog', uselist=False, back_populates='PoiLog', cascade='all, delete-orphan', single_parent=True)
     ErrorLog = relationship('ErrorLog', uselist=False, back_populates='PoiLog', cascade='all, delete-orphan', single_parent=True)
     MetricsLog = relationship('MetricsLog', uselist=False, back_populates='PoiLog', cascade='all, delete-orphan', single_parent=True)
 
     def __repr__(self):
-        return "<{0} Id: {1} - UserId: {2}".format(self.__class__.__name__, self.id, self.user_id)
+        return "<{0} Id: {1} - LogType: {2}".format(self.__class__.__name__, self.id, self.ActivityType.type)
 
 
 class AuditLog(Base):
@@ -59,6 +70,7 @@ class ErrorLog(Base):
     message = Column(db.String(500))
     code = Column(db.Integer)
     trace_message = Column(db.String(1000))
+    meta_data = Column(db.String(1000))
 
     PoiLog = relationship('PoiLog', back_populates='ErrorLog')
 
@@ -75,6 +87,7 @@ class MetricsLog(Base):
     requested_at = Column(db.DateTime)
     response_at = Column(db.DateTime)
     resource = Column(db.String(100))
+    method = Column(db.String(45))
 
     PoiLog = relationship('PoiLog', back_populates='MetricsLog')
 

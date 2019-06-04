@@ -28,5 +28,10 @@
     "user": "root",
     "password": "123",
     "db_name": "monitor_service"
+  },
+  "metrics_threshold": {
+    "response_time": 3000,
+    "cpu_percentage_usage": 70,
+    "login_attempts": 5
   }
 }

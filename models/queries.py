@@ -3,8 +3,11 @@ from models.entities import ActivityType, PoiLog, AuditLog, ErrorLog, MetricsLog
 from models.constants import ActivityType as ActivityTypeEnum
 import sys
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy import and_
+
+
+LOGIN_URI = '/api/login'
 
 
 def create_db_schema():
@@ -128,7 +131,6 @@ def get_activity_by_type(db_session, a_type):
 
 def create_poi_log_entity(db_session, data, activity_type_entity):
     client = get_or_create_client(db_session, data)
-    print('POIII', client.username)
     poi_log_entity = PoiLog()
 
     if data.get('user', False):
@@ -155,7 +157,6 @@ def get_or_create_client(db_session, data):
             .filter(and_(Client.username == username, Client.user_agent == user_agent)) \
             .first()
 
-        print('CLIENT', client_found)
         if client_found:
             return client_found
 
@@ -165,6 +166,30 @@ def get_or_create_client(db_session, data):
         print('Error while getting or creating a Client entity!', sys.exc_info()[0])
         raise
 
+
+def get_login_requests_within(db_session, method, seconds):
+    try:
+        now = datetime.now()
+        seconds_ago = now - timedelta(seconds=seconds)
+
+        return db_session.query(PoiLog)\
+            .join(PoiLog.MetricsLog)\
+            .filter(
+                and_(
+                    PoiLog.created_at > seconds_ago.strftime("%Y-%m-%d %H:%M:%S"),
+                    PoiLog.created_at <= now.strftime("%Y-%m-%d %H:%M:%S"),
+                    MetricsLog.method == method,
+                    MetricsLog.resource == LOGIN_URI
+                )
+            )\
+            .count()
+
+    except Exception:
+        db_session.rollback()
+        print('Error while querying metrics log!', sys.exc_info()[0])
+        raise
+    finally:
+        db_session.close()
 
 def get_expections(tail_datime): # TODO: en SQL
     pass

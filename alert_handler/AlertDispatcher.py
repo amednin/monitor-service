@@ -8,7 +8,7 @@ class AlertDispatcher:
 
     def send_error_alert(self, poi_log):
         message = {
-            "type": 'ERROR-ALERT',
+            "type": 'error-alert',
             "message": {
                 "datetime": poi_log.created_at.strftime("%m/%d/%Y, %H:%M:%S"),
                 "code": poi_log.ErrorLog.code,
@@ -19,7 +19,7 @@ class AlertDispatcher:
 
     def send_no_auth_alert(self):
         not_auth_message = {
-            "type": 'ERROR-ALERT',
+            "type": 'error-alert',
             "message": {
                 "datetime": datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
                 "message": "Request Forbidden by invalid user!"
@@ -29,15 +29,18 @@ class AlertDispatcher:
 
     def send_log_alert(self, message_data):
         message = {
-            "type": ' ERROR-ALERT',
+            "type": 'error-alert',
             "message": message_data['message']
         }
         self.send_alert('error-alert', json.dumps(message))
 
     def send_benchmark_alert(self, threshold, value):
         message = {
-            "type": ' ERROR-ALERT',
-            "message": '[BENCHMARK]: ' + threshold + ' threshold has violate the minimum allowed value with ' + str(value)
+            "type": 'error-alert',
+            "message": {
+                "datetime": datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+                "message": '[BENCHMARK]: ' + threshold + ' threshold has violate the minimum allowed value with ' + str(value)
+            }
         }
         self.send_alert('error-alert', json.dumps(message))
 

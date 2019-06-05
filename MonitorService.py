@@ -41,4 +41,4 @@ class MonitorService:
         errors_channel = listen_to.get('errors')
         logs_channel = listen_to.get('logs')
 
-        return [audit_channel, errors_channel, logs_channel]
+        return [audit_channel, errors_channel, logs_channel, 'error-alert']

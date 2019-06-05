@@ -42,12 +42,17 @@ class RedisConnector:
                 """
                 Example of an alert being listened via 'error-channel'
                 
-                if message_data['type'] == 'ERROR-ALERT':
+                                if message_data['type'] == 'error-alert':
                     print('********** E R R O R    A L E R T **********')
                     print('DATE: ', message_data['message']['datetime'])
                     print('MESSAGE: ', message_data['message']['message'])
                     print('********************************************')
                 """
+                if message_data['type'] == 'error-alert':
+                    print('********** E R R O R    A L E R T **********')
+                    print('DATE: ', message_data['message']['datetime'])
+                    print('MESSAGE: ', message_data['message']['message'])
+                    print('********************************************')
 
             time.sleep(0.05)
 
@@ -77,7 +82,7 @@ class RedisConnector:
 
     def do_threshold_analysis(self, message):
         self.threshold_analyzer.do_benchmark_analysis(message['benchmark'], self.alert_dispatcher)
-        # self.threshold_analyzer.do_logins_analysis()
+        self.threshold_analyzer.analyze_login_attempts(self.db_session, message, self.alert_dispatcher)
 
     @staticmethod
     def is_valid_user_session(data):

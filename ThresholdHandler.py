@@ -1,4 +1,5 @@
 import json
+from models.queries import get_login_requests_within, LOGIN_URI
 
 
 def equal_to(value1, value2):
@@ -19,6 +20,9 @@ def greater_than(value1, value2):
 
 def greater_equal_than(value1, value2):
     return value1 < value2
+
+
+LOGIN_ATTEMPT_RANK_TIME_IN_SECONDS = 10
 
 
 class ThresholdHandler:
@@ -52,5 +56,13 @@ class ThresholdHandler:
         except:
             print('No valid comparator provided!', comparator)
 
-    def analyze_requests_in_time(self, data):
-        pass
+    def analyze_login_attempts(self, db_session, data, alert_dispatcher):
+        resource_request = data['request']['request']
+
+        if resource_request == LOGIN_URI:
+            method = data['request']['method']
+            logs = get_login_requests_within(db_session, method, LOGIN_ATTEMPT_RANK_TIME_IN_SECONDS)
+            allowed_login_attempts = int(self.threshold_params['login_attempts'])
+
+            if self.should_raise_alert(int(logs), allowed_login_attempts, '>'):
+                alert_dispatcher.send_benchmark_alert(logs, allowed_login_attempts)

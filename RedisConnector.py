@@ -1,7 +1,7 @@
 import redis
 import json
 import time
-from models.queries import insert_audit_log, insert_error_log, insert_log
+from models.queries import insert_audit_log, insert_error_log, insert_log, LOGIN_URI
 from models.constants import LogType, ErrorSeverity
 from alert_handler.AlertDispatcher import AlertDispatcher
 from ThresholdHandler import ThresholdHandler
@@ -65,7 +65,7 @@ class RedisConnector:
         log_type = message_data['type']
 
         if log_type == LogType.ACTIVITY.value:
-            if not self.is_valid_user_session(message_data):
+            if not self.is_valid_user_session(message_data) and message_data['request']['request'] == LOGIN_URI:
                 self.alert_dispatcher.send_no_auth_alert()
             else:
                 insert_audit_log(self.db_session, message_data['message'])

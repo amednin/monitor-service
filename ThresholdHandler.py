@@ -22,7 +22,7 @@ def greater_equal_than(value1, value2):
     return value1 < value2
 
 
-LOGIN_ATTEMPT_RANK_TIME_IN_SECONDS = 10
+LOGIN_ATTEMPT_RANK_TIME_IN_SECONDS = 20
 
 
 class ThresholdHandler:
@@ -61,8 +61,7 @@ class ThresholdHandler:
 
         if resource_request == LOGIN_URI:
             method = data['request']['method']
-            logs = get_login_requests_within(db_session, method, LOGIN_ATTEMPT_RANK_TIME_IN_SECONDS)
-            allowed_login_attempts = int(self.threshold_params['login_attempts'])
+            logs_count = get_login_requests_within(db_session, method, LOGIN_ATTEMPT_RANK_TIME_IN_SECONDS)
 
-            if self.should_raise_alert(int(logs), allowed_login_attempts, '>'):
-                alert_dispatcher.send_benchmark_alert(logs, allowed_login_attempts)
+            if self.should_raise_alert('login_attempts', int(logs_count), '>'):
+                alert_dispatcher.send_benchmark_alert('login_attempts', logs_count)

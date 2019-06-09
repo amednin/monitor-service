@@ -190,9 +190,3 @@ def get_login_requests_within(db_session, method, seconds):
         raise
     finally:
         db_session.close()
-
-def get_expections(tail_datime): # TODO: en SQL
-    pass
-
-def get_requests_more_than_ms(milliseconds):  # TODO: en SQL
-    pass

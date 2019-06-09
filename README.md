@@ -1,26 +1,12 @@
 # Monitor Service
 
-A microservice written in Python that will handle mainly three specific services
+A microservice written in Python that will handle logging persistence by listening redis channles
 
-- Audit Collector
-- Metrics Alert
-- Logs
+- audit-channel
+- errors-channel
+- logs-channel
 
 ## Requirements
-
-#### Rabbitmq
-RabbitMQ 3.7.14
-
-You can use a docker container for not installing one more dependency on your machine
-```
-docker pull rabbitmq
-```
-
-Then start it
-```
-docker run -p 5672:5672 --hostname nameko-rabbitmq rabbitmq:3
-```
-
 
 #### Python
 Current python version is 3.7.3 during the development
@@ -73,15 +59,6 @@ If you want to create database schema through sqlalchemy ORM tool, you can execu
 Prerequisite is to have a `monitor_service` database already create. Otherwise you could use the `sql/monitor-service.sql` file to execute on your database client.
 You need to populate `ActivityType` table executing `populate_default()` from models/queries.py
 
-## Start Project
-Run Rabbitmq: `docker run -p 5672:5672 --hostname nameko-rabbitmq rabbitmq:3`
-
-Run Redis: `redis-server & redis-cli`
-
-Start RPC microservice: `nameko run AuditLogService`
-
-Start Python redis subscription: `python main.py`
-
 ## Troubleshooting
 Running pip in order to install ` pipenv` in OSX may cause an error similar to
 ```
@@ -92,3 +69,15 @@ ImportError: cannot import name main
 ```
 
 Fix: `python -m pip install pipenv`
+
+## Pre-requirements
+
+`ActivityType` table should contain data to start working with the database.
+
+For that you can run `models/queries.py:populate_default()` function
+
+## Start Project
+
+Run Redis: `redis-server & redis-cli`
+
+Start Python redis subscription: `python main.py`

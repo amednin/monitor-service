@@ -30,7 +30,10 @@ class AlertDispatcher:
     def send_log_alert(self, message_data):
         message = {
             "type": 'error-alert',
-            "message": message_data['message']
+            "message": {
+                "datetime": datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+                "message": message_data['message']
+            }
         }
         self.send_alert('error-alert', json.dumps(message))
 

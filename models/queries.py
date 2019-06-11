@@ -178,7 +178,7 @@ def get_login_requests_within(db_session, method, seconds):
                 and_(
                     PoiLog.created_at > seconds_ago.strftime("%Y-%m-%d %H:%M:%S"),
                     PoiLog.created_at <= now.strftime("%Y-%m-%d %H:%M:%S"),
-                    MetricsLog.method == method,
+                    MetricsLog.method == 'POST',
                     MetricsLog.resource == LOGIN_URI
                 )
             )\

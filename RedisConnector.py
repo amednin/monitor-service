@@ -59,7 +59,8 @@ class RedisConnector:
     def listen_to_logs_channel(self, redis_message, message_data):
         if redis_message.get('channel', '') == 'logs-channel':
             insert_log(self.db_session, message_data)
-            self.alert_dispatcher.send_log_alert(message_data)
+            if message_data['type'] == 'error':
+                self.alert_dispatcher.send_log_alert(message_data)
 
     def listen_to_activity(self, message_data):
         log_type = message_data['type']
@@ -74,7 +75,7 @@ class RedisConnector:
     def listen_to_error(self, message_data):
         log_type = message_data['type']
 
-        if log_type == LogType.ERROR.value:
+        if log_type == LogType.ERROR.value and isinstance(message_data['message'], dict):
             poi_log = insert_error_log(self.db_session, message_data['message'])
 
             if poi_log.ErrorLog.severity == ErrorSeverity.LOW.value:

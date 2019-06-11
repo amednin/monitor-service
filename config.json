@@ -11,7 +11,7 @@
     },
     "channels": {
       "default": {
-        "listen_to": {
+      "listen_to": {
           "audit": "audit-channel",
           "errors": "errors-channel",
           "logs": "logs-channel"
@@ -30,8 +30,8 @@
     "db_name": "monitor_service"
   },
   "metrics_threshold": {
-    "response_time": 3000,
-    "cpu_percentage_usage": 70,
-    "login_attempts": 5
+    "response_time_ms": { "limit": 3000, "comparator": ">" },
+    "cpu_percentage_usage": { "limit": 70, "comparator": ">" },
+    "login_attempts": { "limit": 5, "login_interval": 20, "comparator": ">" }
   }
 }

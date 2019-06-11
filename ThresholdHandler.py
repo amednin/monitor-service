@@ -41,12 +41,12 @@ class ThresholdHandler:
 
     def do_benchmark_analysis(self, benchmarking_data, alert_dispatcher):
         for key, value in benchmarking_data.items():
-            if self.should_raise_alert(key, value, '>'):
+            if key in self.threshold_params.keys() and self.should_raise_alert(key, value, self.threshold_params[key]['comparator']):
                 alert_dispatcher.send_benchmark_alert(key, value)
 
     def should_raise_alert(self, threshold, value, comparator='='):
         if threshold in self.threshold_params.keys():
-            return self.compare(value, comparator, self.threshold_params[threshold])
+            return self.compare(value, comparator, self.threshold_params[threshold]['limit'])
 
         return False
 
@@ -61,7 +61,7 @@ class ThresholdHandler:
 
         if resource_request == LOGIN_URI:
             method = data['request']['method']
-            logs_count = get_login_requests_within(db_session, method, LOGIN_ATTEMPT_RANK_TIME_IN_SECONDS)
+            logs_count = get_login_requests_within(db_session, method, self.threshold_params['login_attempts']['login_interval'])
 
             if self.should_raise_alert('login_attempts', int(logs_count), '>'):
                 alert_dispatcher.send_benchmark_alert('login_attempts', logs_count)
